@@ -11,6 +11,8 @@ class PaperSummarizerApp:
 
     def __init__(self):
         self.config_file = "config.json"
+        # 确保summaries目录存在
+        Path("summaries").mkdir(exist_ok=True)
         self.load_config()
 
     def load_config(self):
@@ -104,16 +106,16 @@ class PaperSummarizerApp:
             markdown_content = self.generate_markdown(summaries)
 
             # 保存到文件
-            output_file = f"summaries_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+            output_file = f"summaries/summaries_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(markdown_content)
 
             status_msg = f"✅ 成功处理 {len(summaries)} 篇论文\n📄 结果已保存到: {output_file}"
 
-            return markdown_content, status_msg
+            return markdown_content, status_msg, output_file
 
         except Exception as e:
-            return "", f"❌ 错误: {str(e)}"
+            return "", f"❌ 错误: {str(e)}", None
 
     def generate_markdown(self, summaries):
         """生成Markdown格式的总结"""
@@ -281,6 +283,11 @@ class PaperSummarizerApp:
                         value="等待处理..."
                     )
 
+                    download_file = gr.File(
+                        label="📥 下载Markdown文件",
+                        visible=True
+                    )
+
             # 定义提供商改变时的处理函数
             def update_provider_config(provider):
                 """当提供商改变时，更新配置字段的提示和默认值"""
@@ -309,7 +316,7 @@ class PaperSummarizerApp:
                     custom_prompt_input,
                     save_config
                 ],
-                outputs=[markdown_output, status_output]
+                outputs=[markdown_output, status_output, download_file]
             )
 
             # 添加说明
