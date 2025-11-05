@@ -10,13 +10,10 @@ services:
       - "18860:7860"
     volumes:
       # 挂载配置文件（持久化配置）
-      # 注意：首次启动时请在Web界面配置，配置会自动保存到容器内
-      # 如需持久化配置，先创建文件：touch config.json，然后取消下一行注释
-      # - ./config.json:/app/config.json
+      # 注意：服务器上需先创建空文件：touch config.json
+      - ./config.json:/app/config.json
       # 挂载输出目录（持久化生成的摘要）
       - ./summaries:/app/summaries
-      # 挂载数据目录（可选，用于持久化配置）
-      - paper-data:/app/data
     environment:
       # 从.env文件读取API配置（可选，作为默认值）
       - API_KEY=${API_KEY:-}
@@ -36,6 +33,3 @@ services:
 networks:
   paper-network:
     driver: bridge
-
-volumes:
-  paper-data:
