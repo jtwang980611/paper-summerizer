@@ -22,8 +22,8 @@
 ### 1. 克隆或下载项目
 
 ```bash
-git clone <repository-url>
-cd paper_summer
+git clone https://github.com/jtwang980611/paper-summerizer.git
+cd paper-summerizer
 ```
 
 ### 2. 创建虚拟环境（推荐）
@@ -153,7 +153,7 @@ python paper_summarizer.py \
 ## 📁 项目结构
 
 ```
-paper_summer/
+paper-summerizer/
 ├── README.md                 # 项目说明文档
 ├── app.py                    # Gradio Web应用（主入口）
 ├── paper_summarizer.py       # 核心处理逻辑

@@ -231,7 +231,7 @@ docker-compose exec paper-summarizer ls -la /app/config.json
 ```bash
 # 1. 克隆项目
 git clone <repository-url>
-cd paper_summer
+cd paper-summerizer
 
 # 2. 启动容器
 docker-compose up -d

@@ -17,7 +17,7 @@
 ✅ **应该上传的文件：**
 
 ```
-paper_summer/
+paper-summerizer/
 ├── README.md                 # 项目说明
 ├── app.py                    # 主应用
 ├── paper_summarizer.py       # 核心逻辑
@@ -61,7 +61,7 @@ paper_summer/
 
 ```bash
 # 进入项目目录
-cd paper_summer
+cd paper-summerizer
 
 # 初始化 Git 仓库
 git init
@@ -356,7 +356,7 @@ git clone -b production https://github.com/用户名/仓库名.git
 
 ```bash
 # 本地电脑
-cd paper_summer
+cd paper-summerizer
 git init
 git add .
 git commit -m "Initial commit"

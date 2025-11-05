@@ -85,7 +85,7 @@ newgrp docker
 # 在服务器上克隆项目
 cd ~
 git clone <your-repository-url>
-cd paper_summer
+cd paper-summerizer
 ```
 
 ### 方法二：使用 SCP 上传
@@ -94,23 +94,23 @@ cd paper_summer
 
 ```bash
 # 打包项目（排除不必要的文件）
-tar -czf paper_summer.tar.gz \
+tar -czf paper-summerizer.tar.gz \
   --exclude='venv' \
   --exclude='__pycache__' \
   --exclude='*.pyc' \
   --exclude='.git' \
-  paper_summer/
+  paper-summerizer/
 
 # 上传到服务器
-scp paper_summer.tar.gz user@your-server-ip:~/
+scp paper-summerizer.tar.gz user@your-server-ip:~/
 
 # SSH 到服务器
 ssh user@your-server-ip
 
 # 解压
 cd ~
-tar -xzf paper_summer.tar.gz
-cd paper_summer
+tar -xzf paper-summerizer.tar.gz
+cd paper-summerizer
 ```
 
 ### 方法三：使用 SFTP/FTP 工具
@@ -123,7 +123,7 @@ cd paper_summer
 
 ```bash
 # 进入项目目录
-cd ~/paper_summer
+cd ~/paper-summerizer
 
 # 使用 Docker Compose 启动
 docker-compose up -d
@@ -460,7 +460,7 @@ After=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/home/youruser/paper_summer
+WorkingDirectory=/home/youruser/paper-summerizer
 ExecStart=/usr/local/bin/docker-compose up -d
 ExecStop=/usr/local/bin/docker-compose down
 TimeoutStartSec=0
@@ -500,7 +500,7 @@ chmod 600 config.json
 # deploy.sh
 
 # 进入项目目录
-cd ~/paper_summer
+cd ~/paper-summerizer
 
 # 拉取最新代码
 git pull
