@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  paper-summarizer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: paper-summarizer
+    ports:
+      - "7860:7860"
+    volumes:
+      # 挂载配置文件（持久化配置）
+      - ./config.json:/app/config.json
+      # 挂载输出目录（持久化生成的摘要）
+      - ./summaries:/app/summaries
+    environment:
+      # 可选：通过环境变量设置 API 密钥
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TZ=Asia/Shanghai
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:7860')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    networks:
+      - paper-network
+
+networks:
+  paper-network:
+    driver: bridge

@@ -1,0 +1,12 @@
+# PDF处理
+PyPDF2>=3.0.0
+
+# OpenAI API
+openai>=1.0.0
+
+# Web界面
+gradio>=4.0.0
+
+# 其他依赖
+python-dotenv>=1.0.0
+pathlib>=1.0.1
