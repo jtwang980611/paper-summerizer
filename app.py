@@ -108,19 +108,30 @@ class PaperSummarizerApp:
             for i, file in enumerate(files, 1):
                 try:
                     file_path = file.name
-                    print(f"处理 {i}/{total_files}: {Path(file_path).name}")
+                    file_name = Path(file_path).name
+                    print(f"\n{'='*60}")
+                    print(f"处理 {i}/{total_files}: {file_name}")
+                    print(f"{'='*60}")
 
                     summary_data = summarizer.summarize_paper(
                         file_path,
                         custom_prompt if custom_prompt else None
                     )
+
+                    # 验证总结内容
+                    if not summary_data.get('summary') or len(summary_data['summary'].strip()) < 50:
+                        raise Exception("生成的总结内容为空或太短")
+
                     summaries.append(summary_data)
+                    print(f"✅ {file_name} 处理成功\n")
 
                 except Exception as e:
-                    print(f"处理文件时出错: {str(e)}")
+                    error_msg = f"❌ 处理失败: {str(e)}"
+                    print(f"{error_msg}")
+                    print(f"文件路径: {file.name}\n")
                     summaries.append({
                         "file_name": Path(file.name).name,
-                        "summary": f"❌ 处理失败: {str(e)}",
+                        "summary": error_msg,
                         "file_path": file.name
                     })
 

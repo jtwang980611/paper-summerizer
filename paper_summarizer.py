@@ -81,6 +81,11 @@ class PaperSummarizer:
                     page = pdf_reader.pages[page_num]
                     text += page.extract_text()
 
+                # 验证提取的文本
+                if not text or len(text.strip()) < 100:
+                    raise Exception(f"PDF文本提取失败或内容太少（提取到 {len(text)} 字符）")
+
+                print(f"成功提取 {len(text)} 字符，共 {len(pdf_reader.pages)} 页")
                 return text
         except Exception as e:
             raise Exception(f"PDF文本提取失败: {str(e)}")
@@ -99,7 +104,9 @@ class PaperSummarizer:
         try:
             # 使用自定义prompt或默认prompt
             prompt_template = custom_prompt if custom_prompt else self.default_prompt
-            prompt = prompt_template.format(content=text[:8000])  # 限制长度避免超出token限制
+            prompt = prompt_template.format(content=text[:16000])  # 增加输入长度限制
+
+            print(f"准备调用API，模型: {self.model}，输入长度: {len(prompt)} 字符")
 
             # 调用OpenAI API
             response = self.client.chat.completions.create(
@@ -109,11 +116,23 @@ class PaperSummarizer:
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.7,
-                max_tokens=2000
+                max_tokens=4000  # 增加输出token限制
             )
 
-            return response.choices[0].message.content
+            # 验证响应
+            if not response.choices or len(response.choices) == 0:
+                raise Exception("API返回为空，没有生成任何内容")
+
+            summary = response.choices[0].message.content
+
+            if not summary or len(summary.strip()) < 50:
+                raise Exception(f"API返回内容太少或为空（长度: {len(summary) if summary else 0}）")
+
+            print(f"API调用成功，生成总结长度: {len(summary)} 字符")
+            return summary
+
         except Exception as e:
+            print(f"❌ API调用错误详情: {str(e)}")
             raise Exception(f"API调用失败: {str(e)}")
 
     def summarize_paper(self, pdf_path: str, custom_prompt: str = None) -> Dict:
