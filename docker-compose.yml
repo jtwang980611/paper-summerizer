@@ -1,7 +1,6 @@
 services:
   paper-summarizer:
-    image: ghcr.io/jtwang980611/paper-summerizer:latest
-    # 如果镜像不存在，从本地构建
+    # 使用本地构建，不依赖远程镜像
     build:
       context: .
       dockerfile: Dockerfile
