@@ -413,12 +413,18 @@ def main():
     app_instance = PaperSummarizerApp()
     app = app_instance.create_interface()
 
-    # 启动应用
+    # 启动应用 - 优化远程服务器配置
     app.launch(
         server_name="0.0.0.0",
         server_port=7860,
         share=False,
-        show_error=True
+        show_error=True,
+        # 增加连接稳定性配置
+        max_threads=10,  # 最大并发线程
+        quiet=False,  # 显示日志便于调试
+        show_api=False,  # 不显示API文档
+        # 允许跨域（如果需要通过反向代理访问）
+        allowed_paths=["/app/summaries"]
     )
 
 

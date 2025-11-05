@@ -7,6 +7,9 @@ openai>=1.0.0
 # Web界面
 gradio>=4.0.0
 
+# HTTP请求（用于健康检查）
+requests>=2.31.0
+
 # 其他依赖
 python-dotenv>=1.0.0
 pathlib>=1.0.1
