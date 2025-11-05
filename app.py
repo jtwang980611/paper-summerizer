@@ -105,13 +105,17 @@ class PaperSummarizerApp:
             summaries = []
             total_files = len(files)
 
+            print(f"\n{'='*70}")
+            print(f"📚 开始批量处理论文，共 {total_files} 篇")
+            print(f"{'='*70}\n")
+
             for i, file in enumerate(files, 1):
                 try:
                     file_path = file.name
                     file_name = Path(file_path).name
-                    print(f"\n{'='*60}")
-                    print(f"处理 {i}/{total_files}: {file_name}")
-                    print(f"{'='*60}")
+                    print(f"\n{'='*70}")
+                    print(f"📄 [{i}/{total_files}] 正在处理: {file_name}")
+                    print(f"{'='*70}")
 
                     summary_data = summarizer.summarize_paper(
                         file_path,
@@ -123,17 +127,30 @@ class PaperSummarizerApp:
                         raise Exception("生成的总结内容为空或太短")
 
                     summaries.append(summary_data)
-                    print(f"✅ {file_name} 处理成功\n")
+                    success_count = sum(1 for s in summaries if not s['summary'].startswith('❌'))
+                    print(f"\n✅ {file_name} 处理成功！")
+                    print(f"📊 进度: 已完成 {i}/{total_files} 篇 (成功: {success_count}, 失败: {i - success_count})")
 
                 except Exception as e:
                     error_msg = f"❌ 处理失败: {str(e)}"
-                    print(f"{error_msg}")
-                    print(f"文件路径: {file.name}\n")
+                    print(f"\n{error_msg}")
+                    print(f"文件路径: {file.name}")
                     summaries.append({
                         "file_name": Path(file.name).name,
                         "summary": error_msg,
                         "file_path": file.name
                     })
+                    success_count = sum(1 for s in summaries if not s['summary'].startswith('❌'))
+                    print(f"📊 进度: 已完成 {i}/{total_files} 篇 (成功: {success_count}, 失败: {i - success_count})")
+
+            # 统计处理结果
+            success_count = sum(1 for s in summaries if not s['summary'].startswith('❌'))
+            fail_count = total_files - success_count
+
+            print(f"\n{'='*70}")
+            print(f"🎉 批量处理完成！")
+            print(f"📊 总计: {total_files} 篇 | ✅ 成功: {success_count} 篇 | ❌ 失败: {fail_count} 篇")
+            print(f"{'='*70}\n")
 
             # 生成Markdown内容
             markdown_content = self.generate_markdown(summaries)

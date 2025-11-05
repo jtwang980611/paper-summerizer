@@ -85,7 +85,12 @@ class PaperSummarizer:
                 if not text or len(text.strip()) < 100:
                     raise Exception(f"PDF文本提取失败或内容太少（提取到 {len(text)} 字符）")
 
-                print(f"成功提取 {len(text)} 字符，共 {len(pdf_reader.pages)} 页")
+                print(f"✅ 成功提取 {len(text)} 字符，共 {len(pdf_reader.pages)} 页")
+
+                # 显示提取内容的前100个字符预览
+                preview = text.strip()[:100].replace('\n', ' ')
+                print(f"📝 内容预览: {preview}...")
+
                 return text
         except Exception as e:
             raise Exception(f"PDF文本提取失败: {str(e)}")
@@ -106,9 +111,12 @@ class PaperSummarizer:
             prompt_template = custom_prompt if custom_prompt else self.default_prompt
             prompt = prompt_template.format(content=text[:16000])  # 增加输入长度限制
 
-            print(f"准备调用API，模型: {self.model}，输入长度: {len(prompt)} 字符")
+            print(f"🔄 准备调用API...")
+            print(f"   模型: {self.model}")
+            print(f"   输入长度: {len(prompt)} 字符")
 
             # 调用OpenAI API
+            print(f"⏳ 正在调用API生成总结，请稍候...")
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
@@ -128,7 +136,12 @@ class PaperSummarizer:
             if not summary or len(summary.strip()) < 50:
                 raise Exception(f"API返回内容太少或为空（长度: {len(summary) if summary else 0}）")
 
-            print(f"API调用成功，生成总结长度: {len(summary)} 字符")
+            print(f"✅ API调用成功，生成总结长度: {len(summary)} 字符")
+
+            # 显示总结内容的前100个字符预览
+            summary_preview = summary.strip()[:100].replace('\n', ' ')
+            print(f"📄 总结预览: {summary_preview}...")
+
             return summary
 
         except Exception as e:
