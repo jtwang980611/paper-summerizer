@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Dict
 import PyPDF2
 from openai import OpenAI
+import google.generativeai as genai
 
 
 class PaperSummarizer:
@@ -20,15 +21,33 @@ class PaperSummarizer:
         """
         self.api_key = api_key
         self.model = model
+        self.base_url = base_url
 
-        # 初始化OpenAI客户端
-        if base_url:
-            self.client = OpenAI(api_key=api_key, base_url=base_url)
+        # 检测是否使用Gemini模型
+        self.is_gemini = self._is_gemini_model(model)
+
+        if self.is_gemini:
+            # 使用Gemini SDK
+            genai.configure(api_key=api_key)
+            self.gemini_model = genai.GenerativeModel(model)
+            self.client = None
+            print(f"✨ 使用Gemini原生API，支持直接读取PDF文件")
         else:
-            self.client = OpenAI(api_key=api_key)
+            # 初始化OpenAI客户端
+            if base_url:
+                self.client = OpenAI(api_key=api_key, base_url=base_url)
+            else:
+                self.client = OpenAI(api_key=api_key)
+            self.gemini_model = None
 
-        # 默认的总结prompt（针对实证研究论文）
-        self.default_prompt = """请按照实证研究论文的结构，对以下论文进行详细总结：
+    def _is_gemini_model(self, model: str) -> bool:
+        """检测是否为Gemini模型"""
+        return model.lower().startswith('gemini')
+
+    @property
+    def default_prompt(self):
+        """默认的总结prompt（针对实证研究论文）"""
+        return """请按照实证研究论文的结构，对以下论文进行详细总结：
 
 ## 1. 论文基本信息
 - 标题，作者和年份（如果能识别）
@@ -162,17 +181,69 @@ class PaperSummarizer:
         file_name = Path(pdf_path).name
         print(f"正在处理: {file_name}")
 
-        # 提取文本
-        text = self.extract_text_from_pdf(pdf_path)
-
-        # 生成总结
-        summary = self.summarize_text(text, custom_prompt)
+        if self.is_gemini:
+            # Gemini模式：直接读取PDF
+            summary = self.summarize_pdf_with_gemini(pdf_path, custom_prompt)
+        else:
+            # 其他模式：提取文本后总结
+            text = self.extract_text_from_pdf(pdf_path)
+            summary = self.summarize_text(text, custom_prompt)
 
         return {
             "file_name": file_name,
             "summary": summary,
             "file_path": pdf_path
         }
+
+    def summarize_pdf_with_gemini(self, pdf_path: str, custom_prompt: str = None) -> str:
+        """
+        使用Gemini直接读取并总结PDF
+
+        Args:
+            pdf_path: PDF文件路径
+            custom_prompt: 自定义prompt
+
+        Returns:
+            总结后的文本
+        """
+        try:
+            print(f"📄 使用Gemini直接读取PDF文件...")
+
+            # 上传PDF文件
+            pdf_file = genai.upload_file(pdf_path)
+            print(f"✅ PDF文件上传成功")
+
+            # 准备prompt
+            prompt_template = custom_prompt if custom_prompt else self.default_prompt
+            # Gemini直接读取PDF，不需要{content}占位符
+            if '{content}' in prompt_template:
+                prompt = prompt_template.replace('{content}', '请分析上传的PDF文件。')
+            else:
+                prompt = prompt_template
+
+            print(f"🔄 准备调用Gemini API...")
+            print(f"   模型: {self.model}")
+
+            # 调用Gemini API
+            print(f"⏳ 正在调用API生成总结，请稍候...")
+            response = self.gemini_model.generate_content([pdf_file, prompt])
+
+            # 验证响应
+            if not response.text or len(response.text.strip()) < 50:
+                raise Exception(f"API返回内容太少或为空（长度: {len(response.text) if response.text else 0}）")
+
+            summary = response.text
+            print(f"✅ API调用成功，生成总结长度: {len(summary)} 字符")
+
+            # 显示总结内容的前100个字符预览
+            summary_preview = summary.strip()[:100].replace('\n', ' ')
+            print(f"📄 总结预览: {summary_preview}...")
+
+            return summary
+
+        except Exception as e:
+            print(f"❌ Gemini API调用错误详情: {str(e)}")
+            raise Exception(f"Gemini API调用失败: {str(e)}")
 
     def summarize_papers_in_folder(self, folder_path: str, custom_prompt: str = None) -> List[Dict]:
         """
