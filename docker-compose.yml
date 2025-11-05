@@ -18,8 +18,10 @@ services:
       # 挂载数据目录（可选，用于持久化配置）
       - paper-data:/app/data
     environment:
-      # 可选：通过环境变量设置 API 密钥
-      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # 从.env文件读取API配置（可选，作为默认值）
+      - API_KEY=${API_KEY:-}
+      - BASE_URL=${BASE_URL:-}
+      - MODEL=${MODEL:-gemini-2.0-flash-exp}
       - TZ=Asia/Shanghai
     restart: unless-stopped
     healthcheck:

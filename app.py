@@ -20,16 +20,17 @@ class PaperSummarizerApp:
         if os.path.exists(self.config_file):
             with open(self.config_file, 'r', encoding='utf-8') as f:
                 config = json.load(f)
-                self.saved_provider = config.get('provider', 'OpenAI')
+                self.saved_provider = config.get('provider', 'Gemini')
                 self.saved_api_key = config.get('api_key', '')
                 self.saved_base_url = config.get('base_url', '')
-                self.saved_model = config.get('model', 'gpt-3.5-turbo')
+                self.saved_model = config.get('model', 'gemini-2.0-flash-exp')
                 self.saved_prompt = config.get('prompt', '')
         else:
-            self.saved_provider = 'OpenAI'
-            self.saved_api_key = ''
-            self.saved_base_url = ''
-            self.saved_model = 'gpt-3.5-turbo'
+            # 默认配置为Gemini（从环境变量读取）
+            self.saved_provider = 'Gemini'
+            self.saved_api_key = os.getenv('API_KEY', '')
+            self.saved_base_url = os.getenv('BASE_URL', '')
+            self.saved_model = os.getenv('MODEL', 'gemini-2.0-flash-exp')
             self.saved_prompt = ''
 
     def save_config(self, provider, api_key, base_url, model, prompt):
@@ -164,9 +165,9 @@ class PaperSummarizerApp:
             },
             'Gemini': {
                 'base_url': '',
-                'model': 'gemini-pro',
-                'base_url_placeholder': '例如: https://your-new-api-url/v1（必填）',
-                'model_placeholder': 'gemini-pro, gemini-1.5-pro'
+                'model': 'gemini-2.0-flash-exp',
+                'base_url_placeholder': '例如: https://your-api-url/v1（必填）',
+                'model_placeholder': 'gemini-2.0-flash-exp, gemini-1.5-pro, gemini-2.5-flash'
             },
             'Claude': {
                 'base_url': '',
