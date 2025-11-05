@@ -221,12 +221,17 @@ class PaperSummarizer:
             else:
                 prompt_text = prompt_template
 
+            # 构建Gemini原生格式请求URL
+            # 移除base_url末尾的斜杠和/v1路径
+            base = self.base_url.rstrip('/')
+            if base.endswith('/v1'):
+                base = base[:-3]
+
+            url = f"{base}/v1beta/models/{self.model}:generateContent?key={self.api_key}"
+
             print(f"🔄 准备调用Gemini API...")
             print(f"   模型: {self.model}")
-            print(f"   端点: {self.base_url}/v1beta/models/{self.model}:generateContent")
-
-            # 构建Gemini原生格式请求
-            url = f"{self.base_url}/v1beta/models/{self.model}:generateContent?key={self.api_key}"
+            print(f"   端点: {url[:100]}...")
             headers = {
                 'Content-Type': 'application/json'
             }
