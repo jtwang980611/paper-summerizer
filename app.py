@@ -10,7 +10,9 @@ class PaperSummarizerApp:
     """Gradio应用包装器"""
 
     def __init__(self):
-        self.config_file = "config.json"
+        # 配置文件存放在data目录（Docker卷挂载点）
+        Path("data").mkdir(exist_ok=True)
+        self.config_file = "data/config.json"
         # 确保summaries目录存在
         Path("summaries").mkdir(exist_ok=True)
         self.load_config()
