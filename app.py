@@ -66,7 +66,7 @@ class PaperSummarizerApp:
         result = self.save_config(provider, api_key, base_url or '', model, prompt or '')
         return result
 
-    def process_papers(self, files, provider, api_key, base_url, model, custom_prompt, save_config_flag):
+    def process_papers(self, files, provider, api_key, base_url, model, custom_prompt, save_config_flag, progress=gr.Progress()):
         """
         处理上传的PDF文件
 
@@ -78,6 +78,7 @@ class PaperSummarizerApp:
             model: 模型名称
             custom_prompt: 自定义prompt
             save_config_flag: 是否保存配置
+            progress: Gradio进度条对象
 
         Returns:
             markdown内容和状态消息
@@ -85,10 +86,10 @@ class PaperSummarizerApp:
         try:
             # 验证输入
             if not files:
-                return "", "❌ 请上传至少一个PDF文件"
+                return "", "❌ 请上传至少一个PDF文件", None
 
             if not api_key:
-                return "", "❌ 请输入API密钥"
+                return "", "❌ 请输入API密钥", None
 
             # 保存配置（如果勾选）
             if save_config_flag:
@@ -110,9 +111,13 @@ class PaperSummarizerApp:
             print(f"{'='*70}\n")
 
             for i, file in enumerate(files, 1):
+                # 更新进度条
+                progress_value = (i - 1) / total_files
+                file_name = Path(file.name).name
+                progress(progress_value, desc=f"📄 正在处理 ({i}/{total_files}): {file_name[:30]}...")
+
                 try:
                     file_path = file.name
-                    file_name = Path(file_path).name
                     print(f"\n{'='*70}")
                     print(f"📄 [{i}/{total_files}] 正在处理: {file_name}")
                     print(f"{'='*70}")
@@ -143,6 +148,9 @@ class PaperSummarizerApp:
                     success_count = sum(1 for s in summaries if not s['summary'].startswith('❌'))
                     print(f"📊 进度: 已完成 {i}/{total_files} 篇 (成功: {success_count}, 失败: {i - success_count})")
 
+            # 完成进度
+            progress(1.0, desc="✅ 处理完成！")
+
             # 统计处理结果
             success_count = sum(1 for s in summaries if not s['summary'].startswith('❌'))
             fail_count = total_files - success_count
@@ -162,10 +170,10 @@ class PaperSummarizerApp:
 
             status_msg = f"✅ 成功处理 {len(summaries)} 篇论文\n📄 结果已保存到: {output_file}"
 
-            return markdown_content, status_msg, output_file
+            return markdown_content, output_file, status_msg
 
         except Exception as e:
-            return "", f"❌ 错误: {str(e)}", None
+            return "", None, f"❌ 错误: {str(e)}"
 
     def generate_markdown(self, summaries):
         """生成Markdown格式的总结"""
@@ -406,7 +414,7 @@ class PaperSummarizerApp:
                     custom_prompt_input,
                     save_config
                 ],
-                outputs=[markdown_output, status_output, download_file]
+                outputs=[markdown_output, download_file, status_output]
             )
 
             # 添加说明
