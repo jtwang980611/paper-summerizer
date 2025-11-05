@@ -17,21 +17,29 @@ class PaperSummarizerApp:
 
     def load_config(self):
         """加载配置文件"""
-        if os.path.exists(self.config_file):
-            with open(self.config_file, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-                self.saved_provider = config.get('provider', 'Gemini')
-                self.saved_api_key = config.get('api_key', '')
-                self.saved_base_url = config.get('base_url', '')
-                self.saved_model = config.get('model', 'gemini-2.5-flash')
-                self.saved_prompt = config.get('prompt', '')
+        if os.path.exists(self.config_file) and os.path.getsize(self.config_file) > 0:
+            try:
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                    self.saved_provider = config.get('provider', 'Gemini')
+                    self.saved_api_key = config.get('api_key', '')
+                    self.saved_base_url = config.get('base_url', '')
+                    self.saved_model = config.get('model', 'gemini-2.5-flash')
+                    self.saved_prompt = config.get('prompt', '')
+            except (json.JSONDecodeError, Exception) as e:
+                print(f"配置文件加载失败: {e}，使用默认配置")
+                self._load_default_config()
         else:
-            # 默认配置为Gemini（从环境变量读取）
-            self.saved_provider = 'Gemini'
-            self.saved_api_key = os.getenv('API_KEY', '')
-            self.saved_base_url = os.getenv('BASE_URL', '')
-            self.saved_model = os.getenv('MODEL', 'gemini-2.5-flash')
-            self.saved_prompt = ''
+            # 文件不存在或为空，使用默认配置
+            self._load_default_config()
+
+    def _load_default_config(self):
+        """加载默认配置"""
+        self.saved_provider = 'Gemini'
+        self.saved_api_key = os.getenv('API_KEY', '')
+        self.saved_base_url = os.getenv('BASE_URL', '')
+        self.saved_model = os.getenv('MODEL', 'gemini-2.5-flash')
+        self.saved_prompt = ''
 
     def save_config(self, provider, api_key, base_url, model, prompt):
         """保存配置到文件"""
