@@ -11,7 +11,8 @@
       "Bash(do git show $commit)",
       "Bash(echo:*)",
       "Bash(done)",
-      "Bash(git remote:*)"
+      "Bash(git remote:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
