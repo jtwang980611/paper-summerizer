@@ -2,6 +2,8 @@ version: '3.8'
 
 services:
   paper-summarizer:
+    image: ghcr.io/jtwang980611/papaer-summerizer:latest
+    # 如果镜像不存在，从本地构建
     build:
       context: .
       dockerfile: Dockerfile
