@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   paper-summarizer:
     image: ghcr.io/jtwang980611/papaer-summerizer:latest
@@ -12,9 +10,13 @@ services:
       - "18860:7860"
     volumes:
       # 挂载配置文件（持久化配置）
-      - ./config.json:/app/config.json
+      # 注意：首次启动时请在Web界面配置，配置会自动保存到容器内
+      # 如需持久化配置，先创建文件：touch config.json，然后取消下一行注释
+      # - ./config.json:/app/config.json
       # 挂载输出目录（持久化生成的摘要）
       - ./summaries:/app/summaries
+      # 挂载数据目录（可选，用于持久化配置）
+      - paper-data:/app/data
     environment:
       # 可选：通过环境变量设置 API 密钥
       # - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -32,3 +34,6 @@ services:
 networks:
   paper-network:
     driver: bridge
+
+volumes:
+  paper-data:
