@@ -84,7 +84,7 @@ cp config/config.example.json config.json
 docker-compose up -d
 ```
 
-访问 `http://localhost:7860`
+访问 `http://localhost:18860`
 
 详细说明查看：[Docker 部署指南](docs/DOCKER.md)
 
@@ -110,7 +110,7 @@ bash scripts/run.sh
 python app.py
 ```
 
-2. 在浏览器中打开 `http://localhost:7860`
+2. 在浏览器中打开 `http://localhost:18860`
 
 3. 在界面中：
    - 选择API提供商（OpenAI / Gemini / Claude / 自定义）

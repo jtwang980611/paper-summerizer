@@ -41,7 +41,7 @@ python app.py
 
 ### 4️⃣ 使用Web界面
 
-1. 浏览器自动打开 `http://localhost:7860`
+1. 浏览器自动打开 `http://localhost:18860`
 2. 配置API：
    - **选择API提供商**: OpenAI / Gemini / Claude / 自定义
    - **API密钥**: 输入你的API密钥

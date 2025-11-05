@@ -24,7 +24,7 @@ docker-compose logs -f
 ```
 
 3. **访问应用**
-打开浏览器访问 `http://localhost:7860`
+打开浏览器访问 `http://localhost:18860`
 
 4. **停止容器**
 ```bash
@@ -42,7 +42,7 @@ docker build -t paper-summarizer .
 ```bash
 docker run -d \
   --name paper-summarizer \
-  -p 7860:7860 \
+  -p 18860:7860 \
   -v $(pwd)/config.json:/app/config.json \
   -v $(pwd)/summaries:/app/summaries \
   paper-summarizer
@@ -92,7 +92,7 @@ Docker Compose 配置了两个数据卷：
 
 ### 端口映射
 
-- 默认端口：`7860:7860`
+- 默认端口：`18860:7860`（外部18860映射到容器内部7860）
 - 修改主机端口：编辑 `docker-compose.yml` 中的 `ports` 配置
 
 ```yaml
@@ -154,12 +154,12 @@ docker system prune -a
 
 ### 本地访问
 ```
-http://localhost:7860
+http://localhost:18860
 ```
 
 ### 局域网访问
 ```
-http://<你的IP地址>:7860
+http://<你的IP地址>:18860
 ```
 
 查看本机 IP：
@@ -211,13 +211,13 @@ services:
 docker-compose logs
 
 # 检查端口占用
-netstat -an | grep 7860  # Linux/Mac
-netstat -ano | findstr 7860  # Windows
+netstat -an | grep 18860  # Linux/Mac
+netstat -ano | findstr 18860  # Windows
 ```
 
 ### 无法访问 Web 界面
 1. 检查容器是否运行：`docker-compose ps`
-2. 检查端口映射：`docker-compose port paper-summarizer 7860`
+2. 检查端口映射：`docker-compose port paper-summarizer 18860`
 3. 检查防火墙设置
 
 ### 配置不保存
@@ -240,7 +240,7 @@ docker-compose up -d
 docker-compose logs -f
 
 # 4. 在浏览器中访问
-# http://localhost:7860
+# http://localhost:18860
 
 # 5. 使用完毕后停止
 docker-compose down

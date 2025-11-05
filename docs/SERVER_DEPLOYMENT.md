@@ -143,7 +143,7 @@ docker ps
 
 # 应该看到类似输出：
 # CONTAINER ID   IMAGE               STATUS          PORTS
-# abc123...      paper-summarizer   Up 2 minutes   0.0.0.0:7860->7860/tcp
+# abc123...      paper-summarizer   Up 2 minutes   0.0.0.0:18860->7860/tcp
 ```
 
 ## 🔐 第四步：配置防火墙
@@ -151,8 +151,8 @@ docker ps
 ### Ubuntu/Debian (UFW)
 
 ```bash
-# 允许 7860 端口
-sudo ufw allow 7860/tcp
+# 允许 18860 端口
+sudo ufw allow 18860/tcp
 
 # 查看防火墙状态
 sudo ufw status
@@ -161,8 +161,8 @@ sudo ufw status
 ### CentOS/RHEL (firewalld)
 
 ```bash
-# 允许 7860 端口
-sudo firewall-cmd --permanent --add-port=7860/tcp
+# 允许 18860 端口
+sudo firewall-cmd --permanent --add-port=18860/tcp
 sudo firewall-cmd --reload
 
 # 查看开放的端口
@@ -171,17 +171,17 @@ sudo firewall-cmd --list-ports
 
 ### 云服务器安全组
 
-如果使用阿里云、腾讯云、AWS 等云服务器，还需要在**控制台**的**安全组规则**中开放 7860 端口。
+如果使用阿里云、腾讯云、AWS 等云服务器，还需要在**控制台**的**安全组规则**中开放 18860 端口。
 
 ## 🌐 第五步：访问应用
 
 ### 通过 IP 访问
 
 ```
-http://你的服务器IP:7860
+http://你的服务器IP:18860
 ```
 
-例如：`http://123.45.67.89:7860`
+例如：`http://123.45.67.89:18860`
 
 ### 查看服务器 IP
 
@@ -195,7 +195,7 @@ curl ipinfo.io/ip
 
 ## ⚙️ 第六步：配置 API（首次使用）
 
-1. 在浏览器中打开 `http://服务器IP:7860`
+1. 在浏览器中打开 `http://服务器IP:18860`
 2. 在 Web 界面中配置：
    - 选择 API 提供商（OpenAI / Gemini / Claude）
    - 输入 API 密钥
@@ -235,7 +235,7 @@ server {
     server_name your-domain.com;  # 替换为你的域名或 IP
 
     location / {
-        proxy_pass http://127.0.0.1:7860;
+        proxy_pass http://127.0.0.1:18860;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -264,7 +264,7 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-现在可以通过 `http://your-domain.com` 访问（无需 :7860 端口）。
+现在可以通过 `http://your-domain.com` 访问（无需 :18860 端口）。
 
 ### 配置 HTTPS（强烈推荐）
 
@@ -366,9 +366,9 @@ docker system prune -a
 docker-compose logs
 
 # 检查端口是否被占用
-sudo netstat -tulnp | grep 7860
+sudo netstat -tulnp | grep 18860
 # 或
-sudo lsof -i :7860
+sudo lsof -i :18860
 ```
 
 ### 无法访问 Web 界面
@@ -389,15 +389,15 @@ sudo lsof -i :7860
 
 3. **检查云服务器安全组**
    - 登录云服务商控制台
-   - 检查安全组规则是否开放 7860 端口
+   - 检查安全组规则是否开放 18860 端口
 
 4. **测试端口连通性**
    ```bash
    # 在服务器上
-   curl http://localhost:7860
+   curl http://localhost:18860
 
    # 在本地电脑上
-   telnet 服务器IP 7860
+   telnet 服务器IP 18860
    ```
 
 ### 内存不足
@@ -517,7 +517,7 @@ docker-compose up -d
 # 查看状态
 docker-compose ps
 
-echo "部署完成！访问 http://$(curl -s ifconfig.me):7860"
+echo "部署完成！访问 http://$(curl -s ifconfig.me):18860"
 ```
 
 使用：

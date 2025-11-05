@@ -23,7 +23,7 @@ pip install -r requirements.txt
 ```bash
 python app.py
 ```
-Launches Gradio interface on `http://localhost:7860`
+Launches Gradio interface on `http://localhost:18860`
 
 ### Command Line Interface
 ```bash

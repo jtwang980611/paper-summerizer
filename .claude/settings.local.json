@@ -3,7 +3,15 @@
     "allow": [
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(.gitignore)"
+      "Bash(.gitignore)",
+      "Bash(python:*)",
+      "Bash(cat:*)",
+      "Bash(git log:*)",
+      "Bash(while read commit)",
+      "Bash(do git show $commit)",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(git remote:*)"
     ],
     "deny": [],
     "ask": []

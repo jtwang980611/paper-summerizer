@@ -105,7 +105,7 @@ git push -u origin main
 **服务器要求：**
 - Linux 服务器（Ubuntu/CentOS/Debian）
 - 已安装 Docker 和 Docker Compose
-- 已开放 7860 端口
+- 已开放 18860 端口
 
 如未安装 Docker，查看：[服务器部署指南](SERVER_DEPLOYMENT.md)
 
@@ -186,7 +186,7 @@ docker-compose ps
 应该看到类似输出：
 ```
 NAME                 STATUS          PORTS
-paper-summarizer     Up 2 minutes    0.0.0.0:7860->7860/tcp
+paper-summarizer     Up 2 minutes    0.0.0.0:18860->7860/tcp
 ```
 
 **访问应用：**
@@ -196,7 +196,7 @@ paper-summarizer     Up 2 minutes    0.0.0.0:7860->7860/tcp
 curl ifconfig.me
 
 # 在浏览器中访问
-# http://你的服务器IP:7860
+# http://你的服务器IP:18860
 ```
 
 ---
@@ -270,7 +270,7 @@ chmod +x scripts/update.sh
 两种方式：
 
 **方式一：通过 Web 界面配置**
-1. 访问 `http://服务器IP:7860`
+1. 访问 `http://服务器IP:18860`
 2. 在界面中填写 API 配置
 3. 勾选"保存配置"
 4. 配置会保存到 `config.json`
@@ -368,7 +368,7 @@ git push -u origin main
 
 1. 购买阿里云 ECS（1核2G即可）
 2. 选择 Ubuntu 20.04 系统
-3. 在安全组开放 7860 端口
+3. 在安全组开放 18860 端口
 
 **第三步：SSH 登录服务器**
 
@@ -404,7 +404,7 @@ chmod +x scripts/deploy.sh
 curl ifconfig.me
 
 # 在浏览器访问
-# http://你的IP:7860
+# http://你的IP:18860
 ```
 
 **第七步：配置 API**
