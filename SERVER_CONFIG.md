@@ -15,7 +15,7 @@ cd /home/ubuntu/paper-summerizer
 cat > .env << 'EOF'
 API_KEY=你的API密钥
 BASE_URL=你的API基础URL
-MODEL=gemini-2.0-flash-exp
+MODEL=gemini-2.5-flash
 EOF
 
 # 设置文件权限（仅自己可读）
@@ -52,6 +52,6 @@ docker compose up -d
 
 - `API_KEY`: 你的API密钥
 - `BASE_URL`: API基础URL（例如：`http://your-server:3000/v1`）
-- `MODEL`: 模型名称（默认：`gemini-2.0-flash-exp`）
+- `MODEL`: 模型名称（默认：`gemini-2.5-flash`）
 
 这些环境变量会作为Web界面的**默认值**，你仍可以在界面中修改。

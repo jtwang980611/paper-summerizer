@@ -21,7 +21,7 @@ services:
       # 从.env文件读取API配置（可选，作为默认值）
       - API_KEY=${API_KEY:-}
       - BASE_URL=${BASE_URL:-}
-      - MODEL=${MODEL:-gemini-2.0-flash-exp}
+      - MODEL=${MODEL:-gemini-2.5-flash}
       - TZ=Asia/Shanghai
     restart: unless-stopped
     healthcheck:
