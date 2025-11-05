@@ -353,16 +353,16 @@ class PaperSummarizerApp:
                         interactive=False
                     )
 
+                    download_file = gr.File(
+                        label="📥 下载Markdown文件",
+                        visible=True
+                    )
+
                     gr.Markdown("### 📄 总结结果")
 
                     markdown_output = gr.Markdown(
                         label="总结内容",
                         value="等待处理..."
-                    )
-
-                    download_file = gr.File(
-                        label="📥 下载Markdown文件",
-                        visible=True
                     )
 
             # 定义提供商改变时的处理函数
