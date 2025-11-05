@@ -45,15 +45,26 @@ class PaperSummarizerApp:
 
     def save_config(self, provider, api_key, base_url, model, prompt):
         """保存配置到文件"""
-        config = {
-            'provider': provider,
-            'api_key': api_key,
-            'base_url': base_url,
-            'model': model,
-            'prompt': prompt
-        }
-        with open(self.config_file, 'w', encoding='utf-8') as f:
-            json.dump(config, f, indent=2, ensure_ascii=False)
+        try:
+            config = {
+                'provider': provider,
+                'api_key': api_key,
+                'base_url': base_url,
+                'model': model,
+                'prompt': prompt
+            }
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=2, ensure_ascii=False)
+            return "✅ 配置已保存"
+        except Exception as e:
+            return f"❌ 保存失败: {str(e)}"
+
+    def save_config_only(self, provider, api_key, base_url, model, prompt):
+        """仅保存配置（供按钮调用）"""
+        if not api_key:
+            return "❌ 请输入API密钥"
+        result = self.save_config(provider, api_key, base_url or '', model, prompt or '')
+        return result
 
     def process_papers(self, files, provider, api_key, base_url, model, custom_prompt, save_config_flag):
         """
@@ -250,9 +261,14 @@ class PaperSummarizerApp:
                     )
 
                     save_config = gr.Checkbox(
-                        label="保存配置到本地",
+                        label="处理PDF时自动保存配置",
                         value=True
                     )
+
+                    # 添加独立的保存配置按钮
+                    with gr.Row():
+                        save_config_btn = gr.Button("💾 立即保存配置", size="sm", variant="secondary")
+                        config_status = gr.Textbox(label="", placeholder="配置状态", lines=1, show_label=False, interactive=False)
 
                     gr.Markdown("### 📝 自定义Prompt")
 
@@ -313,6 +329,19 @@ class PaperSummarizerApp:
                 fn=update_provider_config,
                 inputs=[provider_dropdown],
                 outputs=[base_url_input, model_input]
+            )
+
+            # 绑定保存配置按钮
+            save_config_btn.click(
+                fn=self.save_config_only,
+                inputs=[
+                    provider_dropdown,
+                    api_key_input,
+                    base_url_input,
+                    model_input,
+                    custom_prompt_input
+                ],
+                outputs=[config_status]
             )
 
             # 绑定处理函数
