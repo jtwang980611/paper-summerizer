@@ -1,10 +1,11 @@
 import os
 import json
+import base64
 from pathlib import Path
 from typing import List, Dict
 import PyPDF2
 from openai import OpenAI
-import google.generativeai as genai
+import requests
 
 
 class PaperSummarizer:
@@ -26,19 +27,15 @@ class PaperSummarizer:
         # 检测是否使用Gemini模型
         self.is_gemini = self._is_gemini_model(model)
 
-        if self.is_gemini:
-            # 使用Gemini SDK
-            genai.configure(api_key=api_key)
-            self.gemini_model = genai.GenerativeModel(model)
-            self.client = None
-            print(f"✨ 使用Gemini原生API，支持直接读取PDF文件")
+        # 初始化客户端
+        if base_url:
+            self.client = OpenAI(api_key=api_key, base_url=base_url)
         else:
-            # 初始化OpenAI客户端
-            if base_url:
-                self.client = OpenAI(api_key=api_key, base_url=base_url)
-            else:
-                self.client = OpenAI(api_key=api_key)
-            self.gemini_model = None
+            self.client = OpenAI(api_key=api_key)
+
+        # 如果是Gemini模型且有base_url，使用Gemini原生格式（通过new-api）
+        if self.is_gemini and base_url:
+            print(f"✨ 检测到Gemini模型，将使用原生格式直接读取PDF")
 
     def _is_gemini_model(self, model: str) -> bool:
         """检测是否为Gemini模型"""
@@ -181,9 +178,9 @@ class PaperSummarizer:
         file_name = Path(pdf_path).name
         print(f"正在处理: {file_name}")
 
-        if self.is_gemini:
-            # Gemini模式：直接读取PDF
-            summary = self.summarize_pdf_with_gemini(pdf_path, custom_prompt)
+        if self.is_gemini and self.base_url:
+            # Gemini模式（通过new-api）：使用原生格式直接读取PDF
+            summary = self.summarize_pdf_with_gemini_native(pdf_path, custom_prompt)
         else:
             # 其他模式：提取文本后总结
             text = self.extract_text_from_pdf(pdf_path)
@@ -195,9 +192,9 @@ class PaperSummarizer:
             "file_path": pdf_path
         }
 
-    def summarize_pdf_with_gemini(self, pdf_path: str, custom_prompt: str = None) -> str:
+    def summarize_pdf_with_gemini_native(self, pdf_path: str, custom_prompt: str = None) -> str:
         """
-        使用Gemini直接读取并总结PDF
+        使用Gemini原生格式（通过new-api）直接读取并总结PDF
 
         Args:
             pdf_path: PDF文件路径
@@ -207,32 +204,73 @@ class PaperSummarizer:
             总结后的文本
         """
         try:
-            print(f"📄 使用Gemini直接读取PDF文件...")
+            print(f"📄 使用Gemini原生格式直接读取PDF文件...")
 
-            # 上传PDF文件
-            pdf_file = genai.upload_file(pdf_path)
-            print(f"✅ PDF文件上传成功")
+            # 读取PDF文件并进行base64编码
+            with open(pdf_path, 'rb') as pdf_file:
+                pdf_data = pdf_file.read()
+                pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
+
+            print(f"✅ PDF文件读取成功，大小: {len(pdf_data)} 字节")
 
             # 准备prompt
             prompt_template = custom_prompt if custom_prompt else self.default_prompt
-            # Gemini直接读取PDF，不需要{content}占位符
+            # Gemini直接读取PDF，移除{content}占位符
             if '{content}' in prompt_template:
-                prompt = prompt_template.replace('{content}', '请分析上传的PDF文件。')
+                prompt_text = prompt_template.replace('{content}', '请分析上传的PDF文件。')
             else:
-                prompt = prompt_template
+                prompt_text = prompt_template
 
             print(f"🔄 准备调用Gemini API...")
             print(f"   模型: {self.model}")
+            print(f"   端点: {self.base_url}/v1beta/models/{self.model}:generateContent")
+
+            # 构建Gemini原生格式请求
+            url = f"{self.base_url}/v1beta/models/{self.model}:generateContent?key={self.api_key}"
+            headers = {
+                'Content-Type': 'application/json'
+            }
+
+            payload = {
+                "contents": [{
+                    "parts": [
+                        {"text": prompt_text},
+                        {
+                            "inline_data": {
+                                "mime_type": "application/pdf",
+                                "data": pdf_base64
+                            }
+                        }
+                    ]
+                }]
+            }
 
             # 调用Gemini API
             print(f"⏳ 正在调用API生成总结，请稍候...")
-            response = self.gemini_model.generate_content([pdf_file, prompt])
+            response = requests.post(url, headers=headers, json=payload, timeout=300)
+
+            # 检查响应状态
+            if response.status_code != 200:
+                error_msg = f"API返回错误: {response.status_code} - {response.text}"
+                raise Exception(error_msg)
+
+            # 解析响应
+            result = response.json()
+
+            # 提取生成的文本
+            if 'candidates' not in result or len(result['candidates']) == 0:
+                raise Exception(f"API返回为空，没有生成任何内容: {result}")
+
+            candidate = result['candidates'][0]
+            if 'content' not in candidate or 'parts' not in candidate['content']:
+                raise Exception(f"API返回格式异常: {result}")
+
+            summary = candidate['content']['parts'][0].get('text', '')
 
             # 验证响应
-            if not response.text or len(response.text.strip()) < 50:
-                raise Exception(f"API返回内容太少或为空（长度: {len(response.text) if response.text else 0}）")
+            if not summary or len(summary.strip()) < 50:
+                raise Exception(f"API返回内容太少或为空（长度: {len(summary)}）")
 
-            summary = response.text
             print(f"✅ API调用成功，生成总结长度: {len(summary)} 字符")
 
             # 显示总结内容的前100个字符预览
@@ -241,6 +279,12 @@ class PaperSummarizer:
 
             return summary
 
+        except requests.exceptions.Timeout:
+            print(f"❌ API调用超时")
+            raise Exception("API调用超时，请稍后重试")
+        except requests.exceptions.RequestException as e:
+            print(f"❌ 网络请求错误: {str(e)}")
+            raise Exception(f"网络请求失败: {str(e)}")
         except Exception as e:
             print(f"❌ Gemini API调用错误详情: {str(e)}")
             raise Exception(f"Gemini API调用失败: {str(e)}")
